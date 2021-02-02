@@ -60,6 +60,14 @@ void server::sockReady(qintptr socketDescriptor)
     QByteArray buffer; 
     buffer.append(clients[socketDescriptor]->readAll());
     //////////////////////////////
+   
+    for (auto c : clients)
+    {
+        if (c.first != socketDescriptor)
+        {
+            c.second->write(buffer);
+        }
+    }
 
      //////////////////////////////
     if (file.open(QIODevice::Append))
