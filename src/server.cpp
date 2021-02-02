@@ -17,11 +17,27 @@ void server::startServer()
   
 void server::incomingConnection(qintptr socketDescriptor)
 {
-    socket = new QTcpSocket(this);
-    socket->setSocketDescriptor(socketDescriptor);
-     
-    connect(socket, SIGNAL(readyRead()), this, SLOT(sockReady())); 
-    connect(socket, SIGNAL(disconnected()), this, SLOT(sockDisc()));
+    clients[socketDescriptor] = new QTcpSocket(this);
+    clients[socketDescriptor]->setSocketDescriptor(socketDescriptor);
+    //////////////////////////////
+
+     //////////////////////////////
+
+    connect(
+        clients[socketDescriptor],
+        &QTcpSocket::readyRead,
+        [this, socketDescriptor]() {
+            this->sockReady(socketDescriptor);
+        }
+    );
+
+    connect(
+        clients[socketDescriptor],
+        &QTcpSocket::disconnected,
+        [this, socketDescriptor]() {
+            this->sockDisc(socketDescriptor);
+        }
+    );
 
     qDebug() << socketDescriptor<< "Client connected";  
     QString chat_data = "";
@@ -32,30 +48,34 @@ void server::incomingConnection(qintptr socketDescriptor)
     QTextStream in(&file); 
     while (!in.atEnd())
     { 
-        chat_data = in.readLine(); 
+        chat_data = file.readAll();
         out << chat_data << endl;
     }
     file.close();
 
-    socket->write(chat_data.toUtf8());
+    clients[socketDescriptor]->write(chat_data.toUtf8());
 } 
-void server::sockReady()
+void server::sockReady(qintptr socketDescriptor)
 {
     QByteArray buffer; 
-    buffer.append(socket->readAll());
+    buffer.append(clients[socketDescriptor]->readAll());
+    //////////////////////////////
+
+     //////////////////////////////
     if (file.open(QIODevice::Append))
     { 
         QTextStream out(&file);
         out << QString::fromStdString(buffer.toStdString());
-        out << endl;
     }
     else {
         qWarning("Could not open file");
     }
     file.close();
+
 }
-void server::sockDisc()
+void server::sockDisc(qintptr socketDescriptor)
 {
-    qDebug() << "Disconnect";
-    socket->deleteLater();
+    qDebug() << "Disconnect " << socketDescriptor;
+    clients[socketDescriptor]->deleteLater();
+    clients.erase(clients.find(socketDescriptor));
 }

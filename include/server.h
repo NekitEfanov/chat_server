@@ -4,13 +4,14 @@
 #include <QTcpSocket>
 #include <QFile>
 #include <QTextStream>
-
+#include <map>
 class server : public QTcpServer
 {
     Q_OBJECT
 public:
     server();
     ~server();
+    std::map<qintptr, QTcpSocket*> clients;
     QTcpSocket *socket;
     QByteArray Data;
     QString nameclient;
@@ -18,8 +19,8 @@ public:
 public slots:
     void startServer();
     virtual void incomingConnection(qintptr socketDescriptor);
-    void sockReady();
-    void sockDisc();
+    void sockReady(qintptr socketDescriptor);
+    void sockDisc(qintptr socketDescriptor);
 };
 
 #endif // SERVER_H
