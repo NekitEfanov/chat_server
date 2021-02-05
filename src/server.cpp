@@ -73,7 +73,9 @@ void server::sockReady(qintptr socketDescriptor)
     if (file.open(QIODevice::Append))
     { 
         QTextStream out(&file);
-        out << QString::fromStdString(buffer.toStdString());
+        QTextCodec::setCodecForLocale(QTextCodec::codecForName("Windows-1251"));
+        QString fileData = QString::fromLocal8Bit(buffer);
+        out << (QString::fromStdString(fileData.toStdString())) + "\n";
     }
     else {
         qWarning("Could not open file");

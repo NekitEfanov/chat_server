@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <map>
+#include <QTextCodec>
 class server : public QTcpServer
 {
     Q_OBJECT
