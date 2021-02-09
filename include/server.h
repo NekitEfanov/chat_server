@@ -6,6 +6,7 @@
 #include <QTextStream>
 #include <map>
 #include <QTextCodec>
+#include <iostream>
 class server : public QTcpServer
 {
     Q_OBJECT
@@ -17,6 +18,9 @@ public:
     QByteArray Data;
     QString nameclient;
     QFile file = "chat.txt";
+    QByteArray Version = "1001";
+    QByteArray key = "";
+    QByteArray key_client = "";
 public slots:
     void startServer();
     virtual void incomingConnection(qintptr socketDescriptor);
