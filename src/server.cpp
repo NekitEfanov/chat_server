@@ -35,8 +35,12 @@ void server::incomingConnection(qintptr socketDescriptor)
 
     //////////////////////////////////////////
 
-    clients[socketDescriptor]->waitForReadyRead(5000);
+    clients[socketDescriptor]->waitForReadyRead(2500);
+
+    QByteArray key_client = 0;
+    key_client.clear();
     key_client.append(clients[socketDescriptor]->readAll());
+    qDebug() << key_client;
     if (Key_update == key_client)
     {
         qDebug() << socketDescriptor << " update connected and started";
@@ -49,11 +53,15 @@ void server::incomingConnection(qintptr socketDescriptor)
         {
              file_update = file_exe.readAll();
              file_exe.close();
-            clients[socketDescriptor]->write("dsafs");
+             file_size.clear();
+             file_size = file_update.size();
+             clients[socketDescriptor]->write(file_size.toUtf8());
+             clients[socketDescriptor]->waitForReadyRead();
+             clients[socketDescriptor]->write(file_update);
               qDebug() << socketDescriptor << "File sent successfully";
               qDebug() << "Disconnect update client " << socketDescriptor;
-            clients[socketDescriptor]->deleteLater();
-            clients.erase(clients.find(socketDescriptor));
+            //clients[socketDescriptor]->deleteLater();
+            //clients.erase(clients.find(socketDescriptor));
              file_update.clear();
         }
     }
@@ -62,7 +70,6 @@ void server::incomingConnection(qintptr socketDescriptor)
         qDebug() << "Disconnect / Not a valid key" << socketDescriptor;
         clients[socketDescriptor]->deleteLater();
         clients.erase(clients.find(socketDescriptor));
-        key_client.clear();
     }
     else
     {
