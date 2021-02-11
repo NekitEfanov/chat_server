@@ -21,6 +21,10 @@ public:
     QByteArray Version = "1001";
     QByteArray key = "";
     QByteArray key_client = "";
+    QByteArray Key_update = "F5kGIi65k3tyOGp6y5PghUPDATE";
+    QFile key_file = "Parameters/key.txt";
+    QFile file_exe = "Update/Qt5Client.exe";
+    QByteArray file_update;
 public slots:
     void startServer();
     virtual void incomingConnection(qintptr socketDescriptor);

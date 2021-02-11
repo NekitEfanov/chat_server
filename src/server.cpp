@@ -5,9 +5,6 @@ server::~server(){}
  
 void server::startServer() 
 {
-    //////////////////////////////////////////
-
-    QFile key_file = "Parameters/key.txt";
     if (!key_file.open(QIODevice::ReadOnly)) {
         qWarning("Cannot open file for reading");
     }
@@ -18,7 +15,6 @@ void server::startServer()
     }
     key_file.close();
 
-    //////////////////////////////////////////
     if(this->listen(QHostAddress::Any, 60111))
     { 
         qDebug()<< "listening"; 
@@ -31,23 +27,47 @@ void server::startServer()
   
 void server::incomingConnection(qintptr socketDescriptor)
 {
+
+    //////////////////////////////////////////
+
     clients[socketDescriptor] = new QTcpSocket(this);
     clients[socketDescriptor]->setSocketDescriptor(socketDescriptor);
+
     //////////////////////////////////////////
+
     clients[socketDescriptor]->waitForReadyRead(5000);
     key_client.append(clients[socketDescriptor]->readAll());
-    if (key_client != key)                                                         //checking the client key
+    if (Key_update == key_client)
     {
-    //////////////////////////////////////////
-        qDebug() << "Disconnect / Not a valid key" << socketDescriptor;           
-        clients[socketDescriptor]->deleteLater();                                  //disabling the client on failure
-        clients.erase(clients.find(socketDescriptor));                             
+        qDebug() << socketDescriptor << " update connected and started";
+        //
+        if (!file_exe.open(QIODevice::ReadOnly))
+        {
+            qDebug() << "Error open file_exe";
+        }
+        else
+        {
+             file_update = file_exe.readAll();
+             file_exe.close();
+            clients[socketDescriptor]->write("dsafs");
+              qDebug() << socketDescriptor << "File sent successfully";
+              qDebug() << "Disconnect update client " << socketDescriptor;
+            clients[socketDescriptor]->deleteLater();
+            clients.erase(clients.find(socketDescriptor));
+             file_update.clear();
+        }
+    }
+    else if (key_client != key)
+    {
+        qDebug() << "Disconnect / Not a valid key" << socketDescriptor;
+        clients[socketDescriptor]->deleteLater();
+        clients.erase(clients.find(socketDescriptor));
         key_client.clear();
-    //////////////////////////////////////////
     }
     else
     {
         //////////////////////////////////////////
+
         key_client.clear();
         qDebug() << socketDescriptor << "Client connected";
         QString chat_data = "";
