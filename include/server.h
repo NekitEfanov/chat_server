@@ -18,7 +18,7 @@ public:
     QByteArray Data;
     QString nameclient;
     QFile file = "chat.txt";
-    QByteArray Version = "1001";
+    QByteArray Version = "10000";
     QByteArray key = "";
     QByteArray Key_update = "F5kGIi65k3tyOGp6y5PghUPDATE";
     QFile key_file = "Parameters/key.txt";

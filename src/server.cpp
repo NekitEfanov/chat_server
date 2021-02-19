@@ -51,17 +51,15 @@ void server::incomingConnection(qintptr socketDescriptor)
         }
         else
         {
-             file_update = file_exe.readAll();
-             file_exe.close();
-             file_size.clear();
-             file_size = file_update.size();
-             clients[socketDescriptor]->write(file_size.toUtf8());
-             clients[socketDescriptor]->waitForReadyRead();
-             clients[socketDescriptor]->write(file_update);
+              file_size.clear();
+              file_update = file_exe.readAll();
+              file_exe.close();
+              file_size = QString::number(file_update.size());
+              clients[socketDescriptor]->write(file_size.toUtf8());
+              clients[socketDescriptor]->waitForReadyRead();
+              clients[socketDescriptor]->write(file_update);
               qDebug() << socketDescriptor << "File sent successfully";
               qDebug() << "Disconnect update client " << socketDescriptor;
-            //clients[socketDescriptor]->deleteLater();
-            //clients.erase(clients.find(socketDescriptor));
              file_update.clear();
         }
     }
