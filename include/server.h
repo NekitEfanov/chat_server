@@ -18,14 +18,15 @@ public:
     QByteArray Data;
     QString nameclient;
     QFile file = "chat.txt";
-    QByteArray Version = "10000";
+    QByteArray Version = "0002";
     QByteArray key = "";
     QByteArray Key_update = "F5kGIi65k3tyOGp6y5PghUPDATE";
     QFile key_file = "Parameters/key.txt";
     QFile file_exe = "Update/Qt5Client.exe";
     QByteArray file_update;
     QString file_size = "";
-
+private:
+    QTextStream* writeReadStream;
 public slots:
     void startServer();
     virtual void incomingConnection(qintptr socketDescriptor);
