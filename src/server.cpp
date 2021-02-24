@@ -5,24 +5,32 @@ server::~server(){}
  
 void server::startServer() 
 {
-    if (!key_file.open(QIODevice::ReadOnly)) {
+    if (!key_file.open(QIODevice::ReadOnly)) 
         qWarning("Cannot open file for reading");
-    }
-    QTextStream in(&key_file);
-    while (!in.atEnd())                                    //set key
-    {
-        key = key_file.readAll();
-    }
-    key_file.close();
+    
+    else {
+        QTextStream in(&key_file);
 
-    if(this->listen(QHostAddress::Any, 60111))
-    { 
+        while (!in.atEnd())                                    //set key
+            key = key_file.readAll();
+
+        key_file.close();
+    }
+    if(this->listen(QHostAddress::Any, 60111)) { 
         qDebug()<< "listening"; 
+
+        if (!(file.open(QIODevice::Append | QIODevice::ReadWrite | QIODevice::Text)))
+            qWarning("Could not open file");
+
+        else {
+            out = new QTextStream(&file);
+            out->setCodec("UTF-8");
+            server::in = new QTextStream(&file);
+            server::in->setCodec("UTF-8");
+        }
     }  
     else
-    { 
         qDebug()<<"Not listening"; 
-    }
 } 
   
 void server::incomingConnection(qintptr socketDescriptor)
@@ -41,6 +49,7 @@ void server::incomingConnection(qintptr socketDescriptor)
     key_client.clear();
     key_client.append(clients[socketDescriptor]->readAll());
     qDebug() << key_client;
+
     if (Key_update == key_client)
     {
         qDebug() << socketDescriptor << " update connected and started";
@@ -80,19 +89,16 @@ void server::incomingConnection(qintptr socketDescriptor)
     {
         //////////////////////////////////////////
 
-        key_client.clear();
-        qDebug() << socketDescriptor << "Client connected";
-        QString chat_data = "";
-        if (!file.open(QIODevice::ReadOnly)) {
-            qWarning("Cannot open file for reading");
-        }
-        QTextStream in(&file);                                               //getting the chat history from the database and sending it
-        while (!in.atEnd())
+          key_client.clear();
+          qDebug() << socketDescriptor << "Client connected";
+          QString chat_data = "";                                                //getting the chat history from the database and sending it
+          in->seek(0);
+
+        while (!in->atEnd())
         {
             chat_data = file.readAll();
         }
-        file.close();
-
+      
         clients[socketDescriptor]->write(Version + chat_data.toUtf8());
 
         //////////////////////////////////////////
@@ -133,17 +139,10 @@ void server::sockReady(qintptr socketDescriptor)
 
     //////////////////////////////////////////
 
-    if (file.open(QIODevice::Append))
-    { 
-        QTextStream out(&file);
         QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
-        QString fileData = QString::fromLocal8Bit(buffer);
-        out << (QString::fromStdString(fileData.toStdString())) + "\n";                          //save message in database
-    }
-    else {
-        qWarning("Could not open file");
-    }
-    file.close();
+        QString MessageData = QString::fromLocal8Bit(buffer);
+        *out << MessageData.toUtf8() + "\n";                          //save message in database
+        out->flush();
 
     //////////////////////////////////////////
 }
@@ -152,5 +151,4 @@ void server::sockDisc(qintptr socketDescriptor)
     qDebug() << "Disconnect " << socketDescriptor;
     clients[socketDescriptor]->deleteLater();
     clients.erase(clients.find(socketDescriptor));
- 
 }

@@ -26,7 +26,8 @@ public:
     QByteArray file_update;
     QString file_size = "";
 private:
-    QTextStream* writeReadStream;
+    QTextStream* in;
+    QTextStream* out;
 public slots:
     void startServer();
     virtual void incomingConnection(qintptr socketDescriptor);
