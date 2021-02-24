@@ -48,11 +48,11 @@ void server::incomingConnection(qintptr socketDescriptor)
     QByteArray key_client = 0;
     key_client.clear();
     key_client.append(clients[socketDescriptor]->readAll());
-    qDebug() << key_client;
+    qDebug() << "\t" << "\t" << "Key: ||" << key_client << "||";
 
     if (Key_update == key_client)
     {
-        qDebug() << socketDescriptor << " update connected and started";
+        qDebug() << "\t" << socketDescriptor << " update connected and started";
         //
         if (!file_exe.open(QIODevice::ReadOnly))
         {
@@ -73,8 +73,8 @@ void server::incomingConnection(qintptr socketDescriptor)
                clients[socketDescriptor]->deleteLater();
                clients.erase(clients.find(socketDescriptor));
 
-              qDebug() << socketDescriptor << "File sent successfully";
-              qDebug() << "Disconnect update client " << socketDescriptor;
+              qDebug() << "\t" << socketDescriptor << "File sent successfully";
+              qDebug() << "\t" << socketDescriptor << " update client Disconnect";
 
              file_update.clear();
         }
